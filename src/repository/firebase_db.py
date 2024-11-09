@@ -1,14 +1,58 @@
 import datetime
+from re import S
 from typing import Any
 from os import environ
 from json import dumps
 from firebase_admin import db
+
+from models.errors.errors import AuthenticationError
 
 
 class FirebaseDB:
     def __init__(self):
         """Initialize Firebase connection"""
         self.root = db.reference('/')
+
+    def _set_chat_updated_at(self, chat_id: str):
+        chat_ref = self.root.child("chats").child(chat_id)
+
+        chat_value = chat_ref.get()
+
+        chat_value.update(  # type: ignore
+            {"updated_at": datetime.datetime.now().isoformat()})  # type: ignore
+
+        chat_ref.set(chat_value)
+
+    def _validate_sender(self, message_ref: db.Reference, user_id: int):
+        original_sender = message_ref.child('sender_id').get()
+
+        if original_sender != user_id:
+            raise AuthenticationError(
+                "To update a message you must be the same user"
+            )
+
+    def edit_message(self, chat_id: str, message_id: str, new_message: str, user_id: int) -> dict:
+
+        message_ref = self.root.child(
+            'messages').child(chat_id).child(message_id)
+
+        self._validate_sender(message_ref, user_id)
+
+        message_ref.update({
+            "content": new_message,
+            "edited_at": datetime.datetime.now().isoformat()
+        })
+
+        message = message_ref.get()
+
+        self._set_chat_updated_at(chat_id)
+
+        print(message)
+        
+        return {
+            'id': message_id,
+            **message # type: ignore
+        }
 
     def send_message(self, chat_id: str, user_id: int, message: str) -> dict:
         """Send a message in a chat"""
@@ -21,14 +65,7 @@ class FirebaseDB:
 
         new_message = messages_ref.push(message_data)  # type: ignore
 
-        chat_ref = self.root.child("chats").child(chat_id)
-
-        chat_value = chat_ref.get()
-
-        chat_value.update(  # type: ignore
-            {"updated_at": datetime.datetime.now().isoformat()})  # type: ignore
-
-        chat_ref.set(chat_value)
+        self._set_chat_updated_at(chat_id)
 
         return {
             'id': new_message.key,
@@ -66,7 +103,6 @@ class FirebaseDB:
         }
         new_chat = chat_ref.push(chat_data)  # type: ignore
         return new_chat.key  # type: ignore
-
 
     def get_user_chats(self, user_id: int) -> dict[str, Any]:
         """Get all chats for a user"""

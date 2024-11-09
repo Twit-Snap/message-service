@@ -30,3 +30,12 @@ class ChatService:
         )
 
         return Message(**(dict(created_message)))
+
+    def edit_message(self, message: MessageBase, user_id: int, chat_id: str, message_id: str) -> Message:
+        self.validate_message(message.content)
+
+        updated_message = self.repository.edit_message(
+            chat_id, message_id, message.content, user_id
+        )
+
+        return Message(**(dict(updated_message)))
