@@ -28,7 +28,7 @@ class FirebaseDB:
 
         if not original_sender:
             raise NotFoundError("Message not found")
-        
+
         elif original_sender != user_id:
             raise AuthenticationError(
                 "To update a message you must be the same user"
@@ -50,12 +50,21 @@ class FirebaseDB:
 
         self._set_chat_updated_at(chat_id)
 
-        print(message)
-        
         return {
             'id': message_id,
-            **message # type: ignore
+            **message  # type: ignore
         }
+
+    def delete_message(self, chat_id: str, message_id: str, user_id: int) -> None:
+
+        message_ref = self.root.child(
+            'messages').child(chat_id).child(message_id)
+
+        self._validate_sender(message_ref, user_id)
+
+        message_ref.delete()
+
+        self._set_chat_updated_at(chat_id)
 
     def send_message(self, chat_id: str, user_id: int, message: str) -> dict:
         """Send a message in a chat"""

@@ -59,3 +59,19 @@ def edit_message(message: MessageBase, id: str, chat_id: str, request: Request) 
     )
 
     return JSONResponse(dict(created_message))
+
+
+@router.delete(
+    "/{chat_id}/messages/{id}",
+    summary="Delete a message",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None
+)
+def delete_message(id: str, chat_id: str, request: Request) -> None:
+    authUser = request.state.user
+
+    ChatService().delete_message(
+        authUser["userId"],
+        chat_id,
+        id
+    )

@@ -39,3 +39,8 @@ class ChatService:
         )
 
         return Message(**(dict(updated_message)))
+
+    def delete_message(self, user_id: int, chat_id: str, message_id: str) -> None:
+        self.repository.delete_message(
+            chat_id, message_id, user_id
+        )
