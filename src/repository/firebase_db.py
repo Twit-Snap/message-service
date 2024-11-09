@@ -5,7 +5,7 @@ from os import environ
 from json import dumps
 from firebase_admin import db
 
-from models.errors.errors import AuthenticationError
+from models.errors.errors import AuthenticationError, NotFoundError
 
 
 class FirebaseDB:
@@ -26,7 +26,10 @@ class FirebaseDB:
     def _validate_sender(self, message_ref: db.Reference, user_id: int):
         original_sender = message_ref.child('sender_id').get()
 
-        if original_sender != user_id:
+        if not original_sender:
+            raise NotFoundError("Message not found")
+        
+        elif original_sender != user_id:
             raise AuthenticationError(
                 "To update a message you must be the same user"
             )
