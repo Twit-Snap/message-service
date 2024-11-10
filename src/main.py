@@ -1,7 +1,7 @@
 import logging
 from os import environ
 import dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -14,6 +14,12 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 app = FastAPI()
+
+
+@app.exception_handler(HTTPException)
+@app.exception_handler(Exception)
+async def exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    return error_handler(request, exc)
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,11 +34,6 @@ app.add_middleware(BaseHTTPMiddleware, dispatch=JWTMiddleware())
 
 
 app.include_router(chat_routes.router, prefix="/chats", tags=["chats"])
-
-
-@app.exception_handler(Exception)
-async def exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    return error_handler(request, exc)
 
 
 def init_firebase():

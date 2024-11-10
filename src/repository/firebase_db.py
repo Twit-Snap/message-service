@@ -13,13 +13,16 @@ class FirebaseDB:
         """Initialize Firebase connection"""
         self.root = db.reference('/')
 
-    def _set_chat_updated_at(self, chat_id: str):
+    def _set_chat_updated_at(self, chat_id: str, timestamp: str | None = None):
         chat_ref = self.root.child("chats").child(chat_id)
 
         chat_value = chat_ref.get()
 
+        if not chat_value:
+            raise NotFoundError("Chat not found")
+
         chat_value.update(  # type: ignore
-            {"updated_at": datetime.datetime.now().isoformat()})  # type: ignore
+            {"updated_at": datetime.datetime.now().isoformat() if not timestamp else timestamp})  # type: ignore
 
         chat_ref.set(chat_value)
 
@@ -36,6 +39,10 @@ class FirebaseDB:
 
     def edit_message(self, chat_id: str, message_id: str, new_message: str, user_id: int) -> dict:
 
+        timestamp = datetime.datetime.now().isoformat()
+
+        self._set_chat_updated_at(chat_id, timestamp)
+
         message_ref = self.root.child(
             'messages').child(chat_id).child(message_id)
 
@@ -43,12 +50,10 @@ class FirebaseDB:
 
         message_ref.update({
             "content": new_message,
-            "edited_at": datetime.datetime.now().isoformat()
+            "edited_at": timestamp
         })
 
         message = message_ref.get()
-
-        self._set_chat_updated_at(chat_id)
 
         return {
             'id': message_id,
@@ -57,6 +62,8 @@ class FirebaseDB:
 
     def delete_message(self, chat_id: str, message_id: str, user_id: int) -> None:
 
+        self._set_chat_updated_at(chat_id)
+
         message_ref = self.root.child(
             'messages').child(chat_id).child(message_id)
 
@@ -64,20 +71,20 @@ class FirebaseDB:
 
         message_ref.delete()
 
-        self._set_chat_updated_at(chat_id)
-
     def send_message(self, chat_id: str, user_id: int, message: str) -> dict:
         """Send a message in a chat"""
+        timestamp = datetime.datetime.now().isoformat()
+
+        self._set_chat_updated_at(chat_id, timestamp)
+
         messages_ref = self.root.child('messages').child(chat_id)
         message_data = {
             'content': message,
             'sender_id': user_id,
-            'timestamp': datetime.datetime.now().isoformat()
+            'created_at': timestamp
         }
 
         new_message = messages_ref.push(message_data)  # type: ignore
-
-        self._set_chat_updated_at(chat_id)
 
         return {
             'id': new_message.key,
