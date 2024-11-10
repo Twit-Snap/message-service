@@ -14,13 +14,18 @@ class FirebaseDB:
         """Initialize Firebase connection"""
         self.root = db.reference('/')
 
-    def _set_chat_updated_at(self, chat_id: str, timestamp: str | None = None):
+    def _set_chat_updated_at(self, chat_id: str, user_id: int, timestamp: str | None = None):
         chat_ref = self.root.child("chats").child(chat_id)
 
         chat_value = chat_ref.get()
 
         if not chat_value:
             raise NotFoundError("Chat not found")
+
+        if chat_value["participants"]["user1"]["id"] != user_id and chat_value["participants"]["user2"]["id"] != user_id:  # type: ignore
+            raise AuthenticationError(
+                "To update a chat you must be in it"
+            )
 
         chat_value.update(  # type: ignore
             {"updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat() if not timestamp else timestamp})  # type: ignore
@@ -42,7 +47,7 @@ class FirebaseDB:
 
         timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        self._set_chat_updated_at(chat_id, timestamp)
+        self._set_chat_updated_at(chat_id, user_id,  timestamp)
 
         message_ref = self.root.child(
             'messages').child(chat_id).child(message_id)
@@ -63,7 +68,7 @@ class FirebaseDB:
 
     def delete_message(self, chat_id: str, message_id: str, user_id: int) -> None:
 
-        self._set_chat_updated_at(chat_id)
+        self._set_chat_updated_at(chat_id, user_id)
 
         message_ref = self.root.child(
             'messages').child(chat_id).child(message_id)
@@ -76,7 +81,7 @@ class FirebaseDB:
         """Send a message in a chat"""
         timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        self._set_chat_updated_at(chat_id, timestamp)
+        self._set_chat_updated_at(chat_id, user_id, timestamp)
 
         messages_ref = self.root.child('messages').child(chat_id)
         message_data = {
@@ -127,7 +132,7 @@ class FirebaseDB:
             #     paticipants_ref.child("user2").update(dict(max_user))
 
             return existent_chat_key
-        
+
         min_user = user1 if user1.id < user2.id else user2
         max_user = user1 if user1.id > user2.id else user2
 
