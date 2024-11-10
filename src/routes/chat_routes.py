@@ -21,7 +21,7 @@ def create_chat(chat: ChatBase) -> JSONResponse:
     ChatController().validate_users(chat)
 
     created_chat = ChatService().create_chat(chat)
-    return JSONResponse(dict((created_chat)))
+    return JSONResponse(dict((created_chat)), status_code=status.HTTP_201_CREATED)
 
 
 @router.post(
@@ -39,7 +39,7 @@ def send_message(message: MessageBase, request: Request, id: str) -> JSONRespons
         id
     )
 
-    return JSONResponse(dict(created_message))
+    return JSONResponse(dict(created_message), status_code=status.HTTP_201_CREATED)
 
 
 @router.patch(
@@ -58,7 +58,7 @@ def edit_message(message: MessageBase, id: str, chat_id: str, request: Request) 
         id
     )
 
-    return JSONResponse(dict(created_message))
+    return JSONResponse(dict(created_message), status_code=status.HTTP_200_OK)
 
 
 @router.delete(
