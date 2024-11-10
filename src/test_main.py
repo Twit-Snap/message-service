@@ -16,6 +16,7 @@ from middleware.error_handler import error_handler
 from models.chat import Chat, ChatBase
 from models.message import Message, MessageBase
 from models.errors.errors import ValidationError, MessageMaxLengthException
+from models.user import User
 from repository.firebase_db import FirebaseDB
 from routes.chat_routes import router
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -74,8 +75,8 @@ def auth_header():
 @pytest.fixture
 def sample_chat_data():
     return {
-        "user1_id": 1,
-        "user2_id": 2
+        "user1": {"id": 1, "username": "test1"},
+        "user2": {"id": 2, "username": "test2"}
     }
 
 
@@ -107,12 +108,20 @@ client = TestClient(app)
 
 class TestChatController:
     def test_validate_users_success(self):
-        chat = ChatBase(user1_id=1, user2_id=2)
+        chat = ChatBase(user1=User(id=1, username="test1"),
+                        user2=User(id=2, username="test2"))
         # Should not raise any exception
         ChatController().validate_users(chat)
 
-    def test_validate_users_failure(self):
-        chat = ChatBase(user1_id=0, user2_id=2)
+    def test_validate_users_id_failure(self):
+        chat = ChatBase(user1=User(id=0, username="test1"),
+                        user2=User(id=2, username="test2"))
+        with pytest.raises(ValidationError):
+            ChatController().validate_users(chat)
+
+    def test_validate_users_username_failure(self):
+        chat = ChatBase(user1=User(id=1, username=""),
+                        user2=User(id=2, username="test2"))
         with pytest.raises(ValidationError):
             ChatController().validate_users(chat)
 
@@ -136,12 +145,14 @@ class TestChatService:
         mock_instance.create_chat.return_value = "chat123"
 
         service = ChatService(mock_instance)
-        chat = ChatBase(user1_id=1, user2_id=2)
+        chat = ChatBase(user1=User(id=1, username="test1"),
+                        user2=User(id=2, username="test2"))
         result = service.create_chat(chat)
 
         assert isinstance(result, Chat)
         assert result.id == "chat123"
-        mock_instance.create_chat.assert_called_once_with(1, 2)
+        mock_instance.create_chat.assert_called_once_with(
+            User(id=1, username="test1"), User(id=2, username="test2"))
 
     def test_send_message(self, mock_firebase):
         mock_instance = mock_firebase.return_value

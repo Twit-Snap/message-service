@@ -6,6 +6,7 @@ from json import dumps
 from firebase_admin import db
 
 from models.errors.errors import AuthenticationError, NotFoundError
+from models.user import User
 
 
 class FirebaseDB:
@@ -91,12 +92,15 @@ class FirebaseDB:
             **message_data
         }
 
-    def __chat_exist(self, user1_id: int, user2_id: int) -> str:
-        chats: dict[str, Any] = self.get_user_chats(user1_id)
+    def __chat_exist(self, user1: User, user2: User) -> str:
+        chats: dict[str, Any] = self.get_user_chats(user1.id)
 
-        participants: dict[str, int] = {
-            "user1_id": min(user1_id, user2_id),
-            "user2_id": max(user1_id, user2_id)
+        min_user = user1 if user1.id < user2.id else user2
+        max_user = user1 if user1.id > user2.id else user2
+
+        participants: dict = {
+            "user1": dict(min_user),
+            "user2": dict(max_user)
         }
 
         for key, chat in chats.items():
@@ -105,18 +109,34 @@ class FirebaseDB:
 
         return ''
 
-    def create_chat(self, user1_id: int, user2_id: int) -> str:
+    def create_chat(self, user1: User, user2: User) -> str:
         """Create a new chat between two users"""
-        existent_chat_key = self.__chat_exist(user1_id, user2_id)
+        existent_chat_key = self.__chat_exist(user1, user2)
 
         if len(existent_chat_key) > 0:
+            # paticipants_ref = self.root.child('chats').child(
+            #     existent_chat_key).child("participants")
+            # participants = paticipants_ref.get()
+
+            # print(participants)
+
+            # if participants["user1"]["username"] != min_user.username:  # type: ignore
+            #     paticipants_ref.child("user1").update(dict(min_user))
+
+            # elif participants["user2"]["username"] != max_user.username:  # type: ignore
+            #     paticipants_ref.child("user2").update(dict(max_user))
+
             return existent_chat_key
+        
+        min_user = user1 if user1.id < user2.id else user2
+        max_user = user1 if user1.id > user2.id else user2
 
         chat_ref = self.root.child('chats')
+
         chat_data = {
             'participants': {
-                "user1_id": min(user1_id, user2_id),
-                "user2_id": max(user1_id, user2_id)
+                "user1": dict(min_user),
+                "user2": dict(max_user)
             },
             'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
@@ -129,8 +149,8 @@ class FirebaseDB:
 
         chat_ref = self.root.child('chats')
         chats.update(chat_ref.order_by_child(
-            f'participants/user1_id').equal_to(user_id).get())
+            f'participants/user1/id').equal_to(user_id).get())
         chats.update(chat_ref.order_by_child(
-            f'participants/user2_id').equal_to(user_id).get())
+            f'participants/user2/id').equal_to(user_id).get())
 
         return chats

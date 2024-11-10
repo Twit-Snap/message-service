@@ -16,12 +16,12 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     response_model=Chat
 )
-def create_chat(chat: ChatBase) -> JSONResponse:
-    print("Created")
+def create_chat(chat: ChatBase) -> Chat:
     ChatController().validate_users(chat)
 
     created_chat = ChatService().create_chat(chat)
-    return JSONResponse(dict((created_chat)), status_code=status.HTTP_201_CREATED)
+
+    return created_chat
 
 
 @router.post(

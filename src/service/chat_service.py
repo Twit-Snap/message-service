@@ -14,7 +14,7 @@ class ChatService:
 
     def create_chat(self, chat: ChatBase) -> Chat:
         chat_key: str = self.repository.create_chat(
-            chat.user1_id, chat.user2_id
+            chat.user1, chat.user2
         )
 
         return Chat(
