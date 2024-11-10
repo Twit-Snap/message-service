@@ -22,7 +22,7 @@ class FirebaseDB:
             raise NotFoundError("Chat not found")
 
         chat_value.update(  # type: ignore
-            {"updated_at": datetime.datetime.now().isoformat() if not timestamp else timestamp})  # type: ignore
+            {"updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat() if not timestamp else timestamp})  # type: ignore
 
         chat_ref.set(chat_value)
 
@@ -39,7 +39,7 @@ class FirebaseDB:
 
     def edit_message(self, chat_id: str, message_id: str, new_message: str, user_id: int) -> dict:
 
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         self._set_chat_updated_at(chat_id, timestamp)
 
@@ -73,7 +73,7 @@ class FirebaseDB:
 
     def send_message(self, chat_id: str, user_id: int, message: str) -> dict:
         """Send a message in a chat"""
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         self._set_chat_updated_at(chat_id, timestamp)
 
@@ -118,7 +118,7 @@ class FirebaseDB:
                 "user1_id": min(user1_id, user2_id),
                 "user2_id": max(user1_id, user2_id)
             },
-            'created_at': datetime.datetime.now().isoformat()
+            'created_at': datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
         new_chat = chat_ref.push(chat_data)  # type: ignore
         return new_chat.key  # type: ignore
