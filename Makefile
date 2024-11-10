@@ -10,4 +10,7 @@ stop:
 clean:
 	docker rmi image-message-service
 
-.PHONY: build run stop clean
+test:
+	pytest -v
+
+.PHONY: build run stop clean test 
