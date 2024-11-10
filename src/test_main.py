@@ -149,7 +149,7 @@ class TestChatService:
             "id": "msg123",
             "content": "Hello",
             "sender_id": 1,
-            "timestamp": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat()
         }
 
         service = ChatService(mock_instance)
@@ -201,7 +201,7 @@ class TestChatRoutes:
             "id": "msg123",
             "content": sample_message_data["content"],
             "sender_id": 1,
-            "timestamp": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat()
         }
 
         with requests_mock.Mocker() as m:
@@ -224,7 +224,8 @@ class TestChatRoutes:
             "id": "msg123",
             "content": "Updated content",
             "sender_id": 1,
-            "timestamp": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "edited_at": datetime.now().isoformat()
         }
 
         with requests_mock.Mocker() as m:

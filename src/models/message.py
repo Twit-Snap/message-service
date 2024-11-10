@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -8,4 +9,4 @@ class MessageBase(BaseModel):
 class Message(MessageBase):
     id: str
     sender_id: int
-    timestamp: str
+    created_at: str
