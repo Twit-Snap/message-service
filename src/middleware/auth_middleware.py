@@ -5,12 +5,13 @@ import httpx
 from models.errors.errors import AuthenticationError, BlockedError, NotFoundError, ServiceUnavailableError, ValidationError
 from models.jwt import JwtCustomPayload
 from service.jwt_service import JWTService
+import requests
 
 
 class JWTMiddleware:
-    def __init__(self,):
-        self.jwt_service = JWTService()
-        self.security = HTTPBearer()
+    def __init__(self, jwt_service: JWTService | None = None, security: HTTPBearer | None = None):
+        self.jwt_service = jwt_service or JWTService()
+        self.security = security or HTTPBearer()
 
     async def __call__(self, request: Request, call_next):
         try:
@@ -35,26 +36,25 @@ class JWTMiddleware:
         if decodedToken["type"] == 'admin':
             return
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/{decodedToken['username']}",
-                headers={"Authorization": f"Bearer {token}"}
-            )
+        response = requests.get(
+            f"{environ.get('USERS_SERVICE_URL')}/users/{decodedToken['username']}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
 
-            data = response.json()
+        data = response.json()
 
-            match response.status_code:
-                case 400:
-                    raise ValidationError(
-                        title=data["title"],
-                        detail=data["detail"]
-                    )
-                case 401:
-                    raise AuthenticationError()
-                case 403:
-                    raise BlockedError()
-                case 404:
-                    raise NotFoundError(
-                        f'username {decodedToken["username"]} not found')
-                case 500:
-                    raise ServiceUnavailableError()
+        match response.status_code:
+            case 400:
+                raise ValidationError(
+                    title=data["title"],
+                    detail=data["detail"]
+                )
+            case 401:
+                raise AuthenticationError()
+            case 403:
+                raise BlockedError()
+            case 404:
+                raise NotFoundError(
+                    f'username {decodedToken["username"]} not found')
+            case 500:
+                raise ServiceUnavailableError()
