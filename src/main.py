@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 from os import getenv
@@ -43,7 +44,7 @@ def init_firebase():
 
     except:
         cred = credentials.Certificate(json.loads(
-            getenv("SERVICE_ACCOUNT_KEY")))  # type: ignore
+            base64.b64decode(getenv("SERVICE_ACCOUNT_KEY")).decode('utf-8')))  # type: ignore
 
     firebase_admin.initialize_app(cred, {
         'databaseURL': getenv("DATABASE_URL")
