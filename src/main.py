@@ -50,8 +50,13 @@ def init_firebase():
         'databaseURL': getenv("DATABASE_URL")
     })
 
+    logging.info("Firebase initialized")
+
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s - %(asctime)s', filename='logs.log')
+
     dotenv.load_dotenv()
 
     init_firebase()

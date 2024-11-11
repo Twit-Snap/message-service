@@ -6,6 +6,7 @@ from models.errors.errors import AuthenticationError, BlockedError, NotFoundErro
 from models.jwt import JwtCustomPayload
 from service.jwt_service import JWTService
 import requests
+import logging
 
 
 class JWTMiddleware:
@@ -29,7 +30,8 @@ class JWTMiddleware:
             response = await call_next(request)
             return response
 
-        except HTTPException:
+        except HTTPException as e:
+            logging.error(str(e))
             raise AuthenticationError()
 
     async def _check_blocked(self, decodedToken: JwtCustomPayload, token: str) -> None:

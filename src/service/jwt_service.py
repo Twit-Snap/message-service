@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
+import logging
 from os import getenv
 from typing import Optional, Union
 
@@ -33,6 +34,8 @@ class JWTService(IJWTService):
 
         if not self.secret:
             raise ValueError("JWT_SECRET_KEY environment variable is not set")
+
+        logging.info("JWT_SECRET_KEY set")
 
     def sign(self, payload: JwtCustomPayload) -> str:
         """
