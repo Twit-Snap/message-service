@@ -1,3 +1,4 @@
+import json
 import logging
 from os import environ
 import dotenv
@@ -37,7 +38,13 @@ app.include_router(chat_routes.router, prefix="/chats", tags=["chats"])
 
 
 def init_firebase():
-    cred = credentials.Certificate('src/serviceAccountKey.json')
+    try:
+        cred = credentials.Certificate('src/serviceAccountKey.json')
+
+    except:
+        cred = credentials.Certificate(json.loads(
+            environ.get("SERVICE_ACCOUNT_KEY")))  # type: ignore
+
     firebase_admin.initialize_app(cred, {
         'databaseURL': environ.get("DATABASE_URL")
     })
