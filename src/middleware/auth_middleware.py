@@ -15,24 +15,23 @@ class JWTMiddleware:
         self.security = security or HTTPBearer()
 
     async def __call__(self, request: Request, call_next):
-        try:
-            credentials: HTTPAuthorizationCredentials | None = await self.security(request)
-
-            if not credentials:
-                raise AuthenticationError()
-
-            token = credentials.credentials
-            payload = self.jwt_service.verify(token)
-
-            await self._check_blocked(payload, token)  # type: ignore
-
-            request.state.user = payload
+        if request.method == "OPTIONS" or request.method == "REDIRECT":
             response = await call_next(request)
             return response
 
-        except HTTPException as e:
-            logging.error(str(e))
+        credentials: HTTPAuthorizationCredentials | None = await self.security(request)
+
+        if not credentials:
             raise AuthenticationError()
+
+        token = credentials.credentials
+        payload = self.jwt_service.verify(token)
+
+        await self._check_blocked(payload, token)  # type: ignore
+
+        request.state.user = payload
+        response = await call_next(request)
+        return response
 
     async def _check_blocked(self, decodedToken: JwtCustomPayload, token: str) -> None:
         if decodedToken["type"] == 'admin':
