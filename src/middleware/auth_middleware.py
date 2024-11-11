@@ -16,7 +16,6 @@ class JWTMiddleware:
 
     async def __call__(self, request: Request, call_next):
         try:
-            print(str(request.headers))
             credentials: HTTPAuthorizationCredentials | None = await self.security(request)
 
             if not credentials:
