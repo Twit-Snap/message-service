@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/",
+    "",
     summary="Create a chat and get its id",
     status_code=status.HTTP_201_CREATED,
     response_model=Chat
