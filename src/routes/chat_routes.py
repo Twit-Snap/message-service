@@ -33,6 +33,8 @@ def create_chat(chat: ChatBase) -> Chat:
 def send_message(message: MessageBase, request: Request, id: str) -> JSONResponse:
     authUser = request.state.user
 
+    message.content = message.content.strip()
+
     created_message = ChatService().send_message(
         message,
         authUser["userId"],
@@ -50,6 +52,8 @@ def send_message(message: MessageBase, request: Request, id: str) -> JSONRespons
 )
 def edit_message(message: MessageBase, id: str, chat_id: str, request: Request) -> JSONResponse:
     authUser = request.state.user
+
+    message.content = message.content.strip()
 
     created_message = ChatService().edit_message(
         message,
