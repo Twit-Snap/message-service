@@ -1,7 +1,7 @@
 import datetime
 from re import S
 from typing import Any
-from os import environ
+from os import getenv
 from json import dumps
 from firebase_admin import db
 

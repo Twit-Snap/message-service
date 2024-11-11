@@ -26,7 +26,7 @@ from models.jwt import JwtCustomPayload
 import requests_mock
 import dotenv
 # Fixtures
-from os import environ
+from os import getenv
 dotenv.load_dotenv()
 
 
@@ -182,7 +182,7 @@ class TestChatRoutes:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 
@@ -199,7 +199,7 @@ class TestChatRoutes:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 
@@ -217,7 +217,7 @@ class TestChatRoutes:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 
@@ -241,7 +241,7 @@ class TestChatRoutes:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 
@@ -258,7 +258,7 @@ class TestChatRoutes:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 
@@ -277,7 +277,7 @@ class TestAuthentication:
     def test_invalid_auth_user_username(self):
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"title": "Invalid username",
                       "detail": "Invalid username provided"},
                 status_code=400
@@ -298,7 +298,7 @@ class TestAuthentication:
     def test_auth_user_blocked(self):
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"title": "User blocked",
                       "detail": "Blocked error"},
                 status_code=403
@@ -319,7 +319,7 @@ class TestAuthentication:
     def test_auth_user_unauthorized(self):
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"title": "AuthenticationError",
                       "detail": ""},
                 status_code=401
@@ -340,7 +340,7 @@ class TestAuthentication:
     def test_auth_user_not_found(self):
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"title": "NotFoundError",
                       "detail": "username test not found"},
                 status_code=404
@@ -361,7 +361,7 @@ class TestAuthentication:
     def test_service_unavailable(self):
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"title": "ServiceUnavailableError",
                       "detail": "Service unavailable"},
                 status_code=500
@@ -404,7 +404,7 @@ class TestAuthentication:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"title": "AuthenticationError",
                       "detail": ""},
                 status_code=401
@@ -429,7 +429,7 @@ class TestErrorHandling:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 
@@ -446,7 +446,7 @@ class TestErrorHandling:
 
         with requests_mock.Mocker() as m:
             m.get(
-                f"{environ.get('USERS_SERVICE_URL')}/users/test",
+                f"{getenv('USERS_SERVICE_URL')}/users/test",
                 json={"id": 1, "username": "test"}
             )
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from os import environ
+from os import getenv
 from typing import Optional, Union
 
 import jwt
@@ -28,7 +28,7 @@ class IJWTService(ABC):
 class JWTService(IJWTService):
     def __init__(self):
         self.expires_in = timedelta(days=365)
-        key = environ.get('JWT_SECRET_KEY')
+        key = getenv('JWT_SECRET_KEY')
         self.secret: str = key if key else "mySup3rStr0ngDevSecretKey"
 
         if not self.secret:

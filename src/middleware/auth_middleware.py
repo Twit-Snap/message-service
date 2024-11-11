@@ -1,4 +1,4 @@
-from os import environ
+from os import getenv
 from fastapi import HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import httpx
@@ -37,7 +37,7 @@ class JWTMiddleware:
             return
 
         response = requests.get(
-            f"{environ.get('USERS_SERVICE_URL')}/users/{decodedToken['username']}",
+            f"{getenv('USERS_SERVICE_URL')}/users/{decodedToken['username']}",
             headers={"Authorization": f"Bearer {token}"}
         )
 

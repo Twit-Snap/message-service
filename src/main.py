@@ -1,6 +1,6 @@
 import json
 import logging
-from os import environ
+from os import getenv
 import dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,19 +43,19 @@ def init_firebase():
 
     except:
         cred = credentials.Certificate(json.loads(
-            environ.get("SERVICE_ACCOUNT_KEY")))  # type: ignore
+            getenv("SERVICE_ACCOUNT_KEY")))  # type: ignore
 
     firebase_admin.initialize_app(cred, {
-        'databaseURL': environ.get("DATABASE_URL")
+        'databaseURL': getenv("DATABASE_URL")
     })
 
 
 if __name__ == "__main__":
-    dotenv.load_dotenv(".env")
+    dotenv.load_dotenv()
 
     init_firebase()
 
-    HOST: str = environ.get("HOST") or "0.0.0.0"
-    PORT: int = int(environ.get("PORT") or 8082)
+    HOST: str = getenv("HOST") or "0.0.0.0"
+    PORT: int = int(getenv("PORT") or 8082)
 
     uvicorn.run(app, host=HOST, port=PORT)
