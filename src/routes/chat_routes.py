@@ -6,6 +6,8 @@ from controller.chat_controller import ChatController
 from models.chat import ChatBase, Chat
 from models.message import MessageBase, Message
 from service.chat_service import ChatService
+from utils.sendNotification import send_push_notification
+from models.jwt import JwtUserPayload
 
 router = APIRouter()
 
@@ -31,7 +33,7 @@ def create_chat(chat: ChatBase) -> Chat:
     response_model=Message
 )
 def send_message(message: MessageBase, request: Request, id: str) -> JSONResponse:
-    authUser = request.state.user
+    authUser: JwtUserPayload = request.state.user
 
     message.content = message.content.strip()
 
@@ -40,6 +42,20 @@ def send_message(message: MessageBase, request: Request, id: str) -> JSONRespons
         authUser["userId"],
         id
     )
+
+    if message.receiver_expo_token:
+        send_push_notification(
+            message.receiver_expo_token,
+            f"{authUser['username']} sent a new message",
+            message.content,
+            data={
+                "type": "message",
+                "params": {
+                    "id": id,
+                    "user": authUser["username"]
+                }
+            }
+        )
 
     return JSONResponse(dict(created_message), status_code=status.HTTP_201_CREATED)
 
