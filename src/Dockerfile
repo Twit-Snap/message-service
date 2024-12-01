@@ -10,4 +10,6 @@ COPY .env /code/.env
 COPY . /code/src
 
 CMD ["python3", "src/main.py"]
+COPY newrelic.ini /code/newrelic.ini
+COPY /src /code/src
 

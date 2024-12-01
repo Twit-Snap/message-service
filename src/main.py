@@ -15,8 +15,19 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import firebase_admin
 from firebase_admin import credentials, db
 
+import newrelic.agent
+newrelic.agent.initialize('newrelic.ini')
+
 app = FastAPI()
 
+@app.middleware("http")
+async def add_new_relic_transaction(request, call_next):
+    import newrelic.agent
+    transaction = newrelic.agent.current_transaction()
+    if transaction:
+        transaction.name = f"{request.method} {request.url.path}"
+    response = await call_next(request)
+    return response
 
 @app.exception_handler(HTTPException)
 @app.exception_handler(Exception)
