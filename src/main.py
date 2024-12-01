@@ -20,6 +20,7 @@ newrelic.agent.initialize('newrelic.ini')
 
 app = FastAPI()
 
+
 @app.middleware("http")
 async def add_new_relic_transaction(request, call_next):
     import newrelic.agent
@@ -28,6 +29,7 @@ async def add_new_relic_transaction(request, call_next):
         transaction.name = f"{request.method} {request.url.path}"
     response = await call_next(request)
     return response
+
 
 @app.exception_handler(HTTPException)
 @app.exception_handler(Exception)
