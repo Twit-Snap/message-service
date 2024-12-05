@@ -23,10 +23,10 @@ app = FastAPI()
 
 @app.middleware("http")
 async def add_new_relic_transaction(request, call_next):
-    import newrelic.agent
     transaction = newrelic.agent.current_transaction()
     if transaction:
-        transaction.name = f"{request.method} {request.url.path}"
+        newrelic.agent.set_transaction_name(
+            f"{request.method} {request.url.path}")
     response = await call_next(request)
     return response
 
